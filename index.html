@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI COVID & Flu Screening Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        #video, #canvas {
+            width: 100%;
+            border-radius: 8px;
+            background-color: #000;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">🔬 AI COVID & Flu Screening</h1>
+            <p class="text-gray-600">Simulated AI diagnostic tool using your camera</p>
+        </header>
+
+        <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="text-orange-400 text-xl">⚠️</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-orange-700">
+                        <strong>MEDICAL DISCLAIMER:</strong> This is for demonstration purposes only. It is NOT a medical diagnostic tool. If you feel unwell, consult a healthcare professional.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <main class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+            <div id="setup-view">
+                <h2 class="text-xl font-semibold mb-4">Step 1: Camera Access</h2>
+                <div class="video-container mb-6">
+                    <video id="video" autoplay playsinline></video>
+                </div>
+                <button id="capture-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                    Capture & Analyze
+                </button>
+            </div>
+
+            <div id="loading-view" class="hidden text-center py-10">
+                <div class="flex justify-center mb-4">
+                    <div class="loading-spinner"></div>
+                </div>
+                <h2 class="text-xl font-semibold mb-2" id="status-text">Analyzing image...</h2>
+                <p class="text-gray-500">Processing facial markers and thermal indicators...</p>
+            </div>
+
+            <div id="result-view" class="hidden">
+                <h2 class="text-xl font-semibold mb-6">Analysis Results</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="p-4 rounded-lg border border-gray-200">
+                        <div class="text-sm text-gray-500 uppercase font-bold mb-1">COVID-19 Risk</div>
+                        <div id="covid-risk" class="text-2xl font-bold mb-2">Low</div>
+                        <p id="covid-msg" class="text-sm text-gray-600">No significant indicators detected.</p>
+                    </div>
+                    <div class="p-4 rounded-lg border border-gray-200">
+                        <div class="text-sm text-gray-500 uppercase font-bold mb-1">Flu (Influenza) Risk</div>
+                        <div id="flu-risk" class="text-2xl font-bold mb-2">Low</div>
+                        <p id="flu-msg" class="text-sm text-gray-600">No significant indicators detected.</p>
+                    </div>
+                </div>
+                <button id="reset-btn" class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-200">
+                    Take New Photo
+                </button>
+            </div>
+        </main>
+
+        <footer class="text-center text-gray-400 text-sm">
+            <p>Hosted on Vercel • Educational Prototype</p>
+        </footer>
+    </div>
+
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const setupView = document.getElementById('setup-view');
+        const loadingView = document.getElementById('loading-view');
+        const resultView = document.getElementById('result-view');
+        const statusText = document.getElementById('status-text');
+
+        // Access Camera
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Please allow camera access to use this tool.");
+            }
+        }
+
+        captureBtn.addEventListener('click', async () => {
+            // Draw video frame to canvas
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            // Switch views
+            setupView.classList.add('hidden');
+            loadingView.classList.remove('hidden');
+
+            const steps = [
+                "Detecting facial landmarks...",
+                "Analyzing ocular patterns...",
+                "Estimating thermal variance...",
+                "Finalizing AI model inference..."
+            ];
+
+            for (const step of steps) {
+                statusText.innerText = step;
+                await new Promise(r => setTimeout(r, 800));
+            }
+
+            // Call API
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('covid-risk').innerText = data.results.covid.risk;
+                    document.getElementById('covid-msg').innerText = data.results.covid.message;
+                    document.getElementById('flu-risk').innerText = data.results.flu.risk;
+                    document.getElementById('flu-msg').innerText = data.results.flu.message;
+
+                    // Color coding
+                    const risks = ['covid', 'flu'];
+                    risks.forEach(type => {
+                        const el = document.getElementById(`${type}-risk`);
+                        const risk = data.results[type].risk;
+                        el.className = 'text-2xl font-bold mb-2 ' + 
+                            (risk === 'Low' ? 'text-green-600' : 
+                             risk === 'Moderate' ? 'text-yellow-600' : 'text-red-600');
+                    });
+
+                    loadingView.classList.add('hidden');
+                    resultView.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("API Error:", err);
+                alert("Error connecting to the analysis server.");
+                reset();
+            }
+        });
+
+        resetBtn.addEventListener('click', reset);
+
+        function reset() {
+            resultView.classList.add('hidden');
+            loadingView.classList.add('hidden');
+            setupView.classList.remove('hidden');
+        }
+
+        initCamera();
+    </script>
+</body>
+</html>
