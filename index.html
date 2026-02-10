@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI COVID & Flu Detector</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #000;
+        }
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .loading-ring {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-md mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">🔬 AI Screening</h1>
+            <p class="text-gray-500">Professional COVID & Flu Detection</p>
+        </header>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-8 text-xs text-red-700">
+            <strong>⚠️ MEDICAL DISCLAIMER:</strong> This is a demonstration prototype. Not for medical diagnosis. Consult a doctor if unwell.
+        </div>
+
+        <main class="bg-white rounded-3xl shadow-xl p-6">
+            <!-- Setup View -->
+            <div id="setup-view">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-700">1. Position Camera</h2>
+                    <button id="switch-btn" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-bold flex items-center">
+                        🔄 Switch
+                    </button>
+                </div>
+                
+                <div class="video-container mb-6 shadow-inner">
+                    <video id="video" autoplay playsinline></video>
+                </div>
+
+                <button id="capture-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-2xl shadow-lg transition transform active:scale-95">
+                    START ANALYSIS
+                </button>
+            </div>
+
+            <!-- Loading View -->
+            <div id="loading-view" class="hidden text-center py-12">
+                <div class="loading-ring mb-4"></div>
+                <h3 class="text-xl font-bold text-gray-800" id="status-text">Initializing AI...</h3>
+                <p class="text-gray-500 mt-2">Processing facial markers...</p>
+            </div>
+
+            <!-- Result View -->
+            <div id="result-view" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Diagnostic Report</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <div class="p-5 rounded-2xl border-2 border-gray-100 bg-gray-50">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">COVID-19 Risk</span>
+                        <div id="covid-risk" class="text-3xl font-black mt-1">LOW</div>
+                        <p id="covid-msg" class="text-sm text-gray-500 mt-1">No markers detected.</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl border-2 border-gray-100 bg-gray-50">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Flu (Influenza)</span>
+                        <div id="flu-risk" class="text-3xl font-black mt-1">LOW</div>
+                        <p id="flu-msg" class="text-sm text-gray-500 mt-1">No markers detected.</p>
+                    </div>
+                </div>
+
+                <button id="reset-btn" class="w-full border-2 border-gray-200 text-gray-600 font-bold py-4 rounded-2xl hover:bg-gray-50 transition">
+                    NEW TEST
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const switchBtn = document.getElementById('switch-btn');
+        const setupView = document.getElementById('setup-view');
+        const loadingView = document.getElementById('loading-view');
+        const resultView = document.getElementById('result-view');
+        const statusText = document.getElementById('status-text');
+
+        let currentStream = null;
+        let useFrontCamera = false;
+
+        async function initCamera() {
+            if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+            
+            const constraints = {
+                video: {
+                    facingMode: useFrontCamera ? "user" : "environment",
+                    width: { ideal: 1080 },
+                    height: { ideal: 1440 }
+                }
+            };
+
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+            } catch (err) {
+                alert("Camera access denied. Please enable permissions.");
+            }
+        }
+
+        switchBtn.addEventListener('click', () => {
+            useFrontCamera = !useFrontCamera;
+            initCamera();
+        });
+
+        captureBtn.addEventListener('click', async () => {
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+
+            setupView.classList.add('hidden');
+            loadingView.classList.remove('hidden');
+
+            const steps = ["Scanning Face...", "Analyzing Ocular Patterns...", "Processing Indicators..."];
+            for (let step of steps) {
+                statusText.innerText = step;
+                await new Promise(r => setTimeout(r, 800));
+            }
+
+            try {
+                const res = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ image: dataUrl })
+                });
+                const data = await res.json();
+
+                ['covid', 'flu'].forEach(type => {
+                    const risk = data.results[type].risk;
+                    const el = document.getElementById(`${type}-risk`);
+                    el.innerText = risk;
+                    el.className = `text-3xl font-black mt-1 ${risk === 'Low' ? 'text-green-500' : risk === 'Moderate' ? 'text-yellow-500' : 'text-red-500'}`;
+                    document.getElementById(`${type}-msg`).innerText = data.results[type].message;
+                });
+
+                loadingView.classList.add('hidden');
+                resultView.classList.remove('hidden');
+            } catch (e) {
+                alert("Analysis failed. Try again.");
+                reset();
+            }
+        });
+
+        function reset() {
+            resultView.classList.add('hidden');
+            loadingView.classList.add('hidden');
+            setupView.classList.remove('hidden');
+        }
+
+        resetBtn.addEventListener('click', reset);
+        initCamera();
+    </script>
+</body>
+</html>

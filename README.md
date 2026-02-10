@@ -1,41 +1,25 @@
-# AI COVID & Flu Screening Python App
+# 🌐 AI COVID & Flu Screening Web App (No-Download)
 
-A professional Python web application built with **Streamlit** to perform simulated screenings for COVID-19 and Influenza using your device's camera.
+This is a **Zero-Install** web application that runs entirely in your mobile or desktop browser. No app store downloads or software installations are required.
 
-## 🚀 Features
-- **Instant Camera Access**: Works on mobile and desktop browsers.
-- **AI-Driven Simulation**: Uses computer vision principles to simulate symptom detection.
-- **Mobile Optimized**: Responsive design with high-contrast UI elements.
-- **Easy Hosting**: Designed for one-click deployment on Streamlit Cloud.
+## 🚀 Key Features
+- **No Download Required**: Accessible instantly via a web URL.
+- **Browser-Based Camera**: Uses standard web technologies to access your phone's camera.
+- **PWA Ready**: Can be added to your home screen like a native app without an installation process.
+- **Mobile Optimized**: Designed specifically for a smooth experience on iOS and Android browsers.
 
-## 🛠️ Local Setup
+## 🛠️ How it Works
+1. **Open the URL**: Simply visit the website link on your phone.
+2. **Grant Camera Access**: Your browser will ask for permission to use the camera.
+3. **Start Test**: Point the camera and begin the simulated AI screening.
 
-1. **Clone and Enter:**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   cd YOUR_REPO_NAME
-   ```
-
-2. **Install Requirements:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Run Locally:**
-   ```bash
-   streamlit run app.py
-   ```
-
-## 🌐 Hosting on GitHub & Streamlit Cloud
-
-1. Create a new repository on GitHub and push these files.
-2. Go to [Streamlit Cloud](https://share.streamlit.io/).
-3. Connect your GitHub account and select this repository.
-4. Set the main file path to `app.py`.
-5. Click **Deploy!**
+## 🌐 Deployment (Vercel)
+The app is hosted on Vercel, ensuring high speed and reliability for web users.
+- **Backend**: Python (Flask) Serverless Functions.
+- **Frontend**: HTML5, Tailwind CSS, and JavaScript.
 
 ## ⚠️ Medical Disclaimer
-This application is for **demonstration and educational purposes only**. It does not provide real medical diagnoses. Always consult a medical professional for health concerns.
+This is an educational prototype and a demonstration of AI screening concepts. It is **NOT** a medical diagnostic tool. If you have symptoms, please consult a healthcare professional.
 
 ---
-Built with Python 🐍
+Developed as a high-accessibility web tool.

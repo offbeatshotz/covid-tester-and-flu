@@ -1,0 +1,16 @@
+{
+  "name": "AI COVID & Flu Detector",
+  "short_name": "AI Detector",
+  "description": "Browser-based AI COVID and Flu screening tool",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2850/2850310.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
