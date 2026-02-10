@@ -1,46 +1,41 @@
-# AI COVID & Flu Screening Web App (Vercel Edition)
+# AI COVID & Flu Screening Python App
 
-This is a Python and JavaScript web application that uses a camera to perform simulated screenings for COVID-19 and Flu. It is designed for deployment on **Vercel**.
+A professional Python web application built with **Streamlit** to perform simulated screenings for COVID-19 and Influenza using your device's camera.
 
 ## 🚀 Features
-- **Browser-based Camera Access**: Real-time image capture using standard Web APIs.
-- **Serverless Backend**: Python (Flask) backend running on Vercel Serverless Functions.
-- **AI Simulation**: Visualizes the process of facial and thermal indicator analysis.
-- **Responsive UI**: Built with Tailwind CSS for a modern, mobile-friendly experience.
+- **Instant Camera Access**: Works on mobile and desktop browsers.
+- **AI-Driven Simulation**: Uses computer vision principles to simulate symptom detection.
+- **Mobile Optimized**: Responsive design with high-contrast UI elements.
+- **Easy Hosting**: Designed for one-click deployment on Streamlit Cloud.
 
-## 🛠️ Local Development
+## 🛠️ Local Setup
 
-1. **Clone the repository:**
+1. **Clone and Enter:**
    ```bash
    git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
    cd YOUR_REPO_NAME
    ```
 
-2. **Install the Vercel CLI:**
+2. **Install Requirements:**
    ```bash
-   npm i -g vercel
+   pip install -r requirements.txt
    ```
 
-3. **Run locally:**
+3. **Run Locally:**
    ```bash
-   vercel dev
+   streamlit run app.py
    ```
 
-## 🌐 Hosting on Vercel
+## 🌐 Hosting on GitHub & Streamlit Cloud
 
-1. Push this code to a new repository on GitHub.
-2. Go to the [Vercel Dashboard](https://vercel.com/dashboard).
-3. Click **New Project** and import your GitHub repository.
-4. Vercel will automatically detect the configuration and deploy your application.
-
-## 📁 Project Structure
-- `index.html`: The frontend UI and camera handling.
-- `api/index.py`: The Flask backend for analysis simulation.
-- `vercel.json`: Routing and configuration for Vercel.
-- `requirements.txt`: Python dependencies for the serverless functions.
+1. Create a new repository on GitHub and push these files.
+2. Go to [Streamlit Cloud](https://share.streamlit.io/).
+3. Connect your GitHub account and select this repository.
+4. Set the main file path to `app.py`.
+5. Click **Deploy!**
 
 ## ⚠️ Medical Disclaimer
 This application is for **demonstration and educational purposes only**. It does not provide real medical diagnoses. Always consult a medical professional for health concerns.
 
 ---
-Developed as a web application prototype.
+Built with Python 🐍
