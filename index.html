@@ -53,11 +53,16 @@
 
         <main class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
             <div id="setup-view">
-                <h2 class="text-xl font-semibold mb-4">Step 1: Camera Access</h2>
-                <div class="video-container mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Step 1: Camera Access</h2>
+                    <button id="switch-btn" class="text-blue-600 text-sm font-medium flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                        🔄 Switch Camera
+                    </button>
+                </div>
+                <div class="video-container mb-6 border-2 border-dashed border-gray-200 rounded-lg p-1">
                     <video id="video" autoplay playsinline></video>
                 </div>
-                <button id="capture-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                <button id="capture-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition duration-200 active:transform active:scale-95">
                     Capture & Analyze
                 </button>
             </div>
@@ -102,21 +107,42 @@
         const canvas = document.getElementById('canvas');
         const captureBtn = document.getElementById('capture-btn');
         const resetBtn = document.getElementById('reset-btn');
+        const switchBtn = document.getElementById('switch-btn');
         const setupView = document.getElementById('setup-view');
         const loadingView = document.getElementById('loading-view');
         const resultView = document.getElementById('result-view');
         const statusText = document.getElementById('status-text');
 
+        let currentStream = null;
+        let useFrontCamera = false;
+
         // Access Camera
         async function initCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: {
+                    facingMode: useFrontCamera ? "user" : "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
             } catch (err) {
                 console.error("Error accessing camera:", err);
                 alert("Please allow camera access to use this tool.");
             }
         }
+
+        switchBtn.addEventListener('click', () => {
+            useFrontCamera = !useFrontCamera;
+            initCamera();
+        });
 
         captureBtn.addEventListener('click', async () => {
             // Draw video frame to canvas
