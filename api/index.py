@@ -26,9 +26,5 @@ def analyze():
         }
     })
 
-@app.route('/')
-def home():
-    return "API is active"
-
 if __name__ == '__main__':
     app.run()
